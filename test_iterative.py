@@ -19,7 +19,7 @@ T = 3
 valid_data_dir = '/home/zeng/data/datasets/saliency_Dataset/ECSSD'
 
 # set prior_map to the name of the directory of proir maps
-prior_map = 'SRM'
+prior_map = 'RFCN'
 
 output_dir = '/home/zeng/data/datasets/saliency_Dataset/ECSSD/pubcode'
 
