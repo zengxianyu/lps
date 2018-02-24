@@ -15,10 +15,10 @@ import os
 
 check_root = './parameters'
 # train_data contains two subdirectory: Images (training images) and Masks (ground truth maps)
-train_data = '/home/zeng/data/datasets/saliency_Dataset/ADUTS'
+train_data = '/home/crow/data/datasets/saliency_Dataset/ADUTS'
 p = 5
-epoch = 2
-bsize = 4
+epoch = 3
+bsize = 6
 is_fc = False
 
 if not os.path.exists(check_root):
@@ -40,7 +40,7 @@ deconv.cuda()
 
 loader = torch.utils.data.DataLoader(
             MyData(train_data, transform=True),
-            batch_size=bsize, shuffle=True, num_workers=4, pin_memory=True)
+            batch_size=bsize*5, shuffle=True, num_workers=4, pin_memory=True)
 
 criterion = nn.BCEWithLogitsLoss()
 
@@ -69,6 +69,9 @@ for it in range(epoch):
         del inputs, msk, lbl, loss, feats
         gc.collect()
 
+loader = torch.utils.data.DataLoader(
+            MyData(train_data, transform=True),
+            batch_size=bsize, shuffle=True, num_workers=4, pin_memory=True)
 for it in range(epoch):
     for ib, (data, lbl) in enumerate(loader):
         inputs = Variable(data).cuda()
