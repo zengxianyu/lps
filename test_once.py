@@ -6,8 +6,9 @@ import cv2
 import matplotlib.pyplot as plt
 from model import Feature, Net_conv, Net_fc
 from dataset import MyTestData
+from download import *
 
-# use fully connected region embedding
+# region embedding
 is_fc = False
 
 # valid_data_dir contains two subdirectory: a directory of input images named "Images",
@@ -23,10 +24,18 @@ output_dir = '/home/zeng/data/datasets/saliency_Dataset/ECSSD/pubcode'
 if is_fc:
     param_feature = './feature_fc.pth'
     param_net = './net_fc.pth'
+    download_net = download_net_fc
+    download_feature = download_feature_fc
 else:
     param_feature = './feature_conv.pth'
     param_net = './net_conv.pth'
+    download_net = download_net_conv
+    download_feature = download_feature_conv
 
+if not os.path.exists(param_net):
+    os.system(download_net)
+if not os.path.exists(param_feature):
+    os.system(download_feature)
 
 if not os.path.exists(output_dir):
     os.mkdir(output_dir)
