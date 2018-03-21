@@ -8,8 +8,6 @@ import torchvision.transforms as transforms
 import torchvision.datasets as dset
 from skimage import color, img_as_ubyte
 
-plt.switch_backend('agg')
-
 
 def tensor2image(image):
     """

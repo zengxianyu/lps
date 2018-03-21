@@ -2,71 +2,84 @@ import torch
 from torch.autograd import Variable
 from torch.nn import functional
 import os
-import cv2
-import matplotlib.pyplot as plt
-from model import Feature, Net_conv, Net_fc
+from model import Feature
+import model
 from dataset import MyTestData
-from download import *
+import download
+import time
+import PIL.Image as Image
+import argparse
+import numpy as np
 
-# use fully connected region embedding
-is_fc = False
-
-# the number of iterations
-T = 3
-
-# valid_data_dir contains two subdirectory: a directory of input images named "Images",
-# and a directory of prior maps.
-valid_data_dir = '/home/zeng/data/datasets/saliency_Dataset/ECSSD'
-
-# set prior_map to the name of the directory of proir maps
-prior_map = 'RFCN'
-
-output_dir = '/home/zeng/data/datasets/saliency_Dataset/ECSSD/pubcode'
-
-# parameters
-if is_fc:
-    param_feature = './feature_fc.pth'
-    param_net = './net_fc.pth'
-    download_net = download_net_fc
-    download_feature = download_feature_fc
-else:
-    param_feature = './feature_conv.pth'
-    param_net = './net_conv.pth'
-    download_net = download_net_conv
-    download_feature = download_feature_conv
-
-if not os.path.exists(param_net):
-    os.system(download_net)
-if not os.path.exists(param_feature):
-    os.system(download_feature)
+parser = argparse.ArgumentParser()
+parser.add_argument('--input_dir', default='/home/zeng/data/datasets/saliency_Dataset/ECSSD')
+parser.add_argument('--prior_map', default='RFCN')  # set prior_map to the name of the directory of proir maps
+parser.add_argument('--output_dir', default='/home/zeng/data/datasets/saliency_Dataset/ECSSD/pubcode')  # save checkpoint parameters
+parser.add_argument('--m', default='conv')  # fully connected or convolutional region embedding
+parser.add_argument('--T', type=int, default=3)  # iterations
 
 
-if not os.path.exists(output_dir):
-    os.mkdir(output_dir)
+def test(loader, feature, net, output_dir, T):
+    feature.train(False)
+    net.train(False)
+    print('start')
+    start_time = time.time()
+    it = 1
+    for ib, (data, msk, img_name, img_size) in enumerate(loader):
+        print it
 
-loader = torch.utils.data.DataLoader(
-            MyTestData(valid_data_dir, transform=True, ptag=prior_map),
-            batch_size=1, shuffle=True, num_workers=4, pin_memory=True)
+        inputs = Variable(data).cuda()
 
-feature = Feature()
-feature.cuda()
-feature.load_state_dict(torch.load(param_feature))
+        msk = Variable(msk.unsqueeze(1)).cuda()
 
-if is_fc:
-    net = Net_fc()
-else:
-    net = Net_conv()
-net.cuda()
-net.load_state_dict(torch.load(param_net))
+        feats = feature(inputs)
 
-for ib, (data, msk, img_name, img_size) in enumerate(loader):
-    print ib
-    inputs = Variable(data).cuda()
+        for t in range(1, T + 1):
+            msk = functional.sigmoid(net(feats, msk.detach())) * (1.0 / t) + msk.detach() * ((t - 1.0) / t)
 
-    msk = Variable(msk.unsqueeze(1)).cuda()
-    feats = feature(inputs)
-    for t in range(1, T+1):
-        msk = functional.sigmoid(net(feats, msk.detach())) * (1.0 / t) + msk.detach() * ((t - 1.0) / t)
-    mask = msk.data[0, 0].cpu().numpy()
-    mask = cv2.resize(mask, dsize=(img_size[0][0], img_size[1][0]))
-    plt.imsave(os.path.join(output_dir, img_name[0] + '.png'), mask, cmap='gray')
+        mask = msk.data[0, 0].cpu().numpy()
+        mask = (mask*255).astype(np.uint8)
+        mask = Image.fromarray(mask)
+        mask = mask.resize((img_size[0][0], img_size[1][0]))
+        mask.save(os.path.join(output_dir, img_name[0] + '.png'),'png')
+        it += 1
+    print('end, cost %.2f seconds for %d images' % (time.time() - start_time, it))
+
+
+if __name__ == '__main__':
+    opt = parser.parse_args()
+    print(opt)
+
+    input_dir = opt.input_dir
+    prior_map = opt.prior_map
+    output_dir = opt.output_dir
+
+    # parameters
+    param_feature = './feature_%s.pth' % opt.m
+    param_net = './net_%s.pth' % opt.m
+    constructor = 'download_net_%s' % opt.m
+    download_net = getattr(download, constructor)
+    constructor = 'download_feature_%s' % opt.m
+    download_feature = getattr(download, constructor)
+
+    if not os.path.exists(param_net):
+        os.system(download_net)
+    if not os.path.exists(param_feature):
+        os.system(download_feature)
+
+    if not os.path.exists(output_dir):
+        os.mkdir(output_dir)
+
+    loader = torch.utils.data.DataLoader(
+        MyTestData(input_dir, transform=True, ptag=prior_map),
+        batch_size=1, shuffle=False, num_workers=1, pin_memory=True)
+
+    feature = Feature()
+    feature.cuda()
+    feature.load_state_dict(torch.load(param_feature))
+
+    constructor = 'Net_%s' % opt.m
+    net = getattr(model, constructor)()
+    net.cuda()
+    net.load_state_dict(torch.load(param_net))
+    test(loader, feature, net, output_dir, opt.T)

@@ -4,21 +4,33 @@ import torch.nn as nn
 import torch.nn.functional as functional
 from torch.autograd import Variable
 import torchvision
-from model import Feature, Net_conv, Net_fc, Deconv
+from model import Feature, Deconv
+import model
 from dataset import MyData
 from datetime import datetime
 import numpy as np
 import os
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--train_dir', default='/home/zeng/data/datasets/saliency_Dataset/DUTS/DUT-train')  # training dataset
+parser.add_argument('--check_dir', default='./parameters')  # save checkpoint parameters
+parser.add_argument('--m', default='conv')  # fully connected or convolutional region embedding
+parser.add_argument('--b', type=int, default=6)  # batch size
+parser.add_argument('--e', type=int, default=20)  # epoches
+parser.add_argument('--p', type=int, default=5)  # probability of random flipping during training
+opt = parser.parse_args()
+print(opt)
+
 # from tensorboard import SummaryWriter
 # os.system('rm -rf ./runs/*')
 # writer = SummaryWriter('./runs/'+datetime.now().strftime('%B%d  %H:%M:%S'))
 
-check_root = './parameters'
-# train_data contains two subdirectory: Images (training images) and Masks (ground truth maps)
-train_data = '/home/crow/data/datasets/saliency_Dataset/ADUTS'
-p = 5
-epoch = 3
-bsize = 6
+check_root = opt.check_dir
+train_data = opt.train_dir
+p = opt.p
+epoch = opt.e
+bsize = opt.b
 is_fc = False
 
 if not os.path.exists(check_root):
@@ -27,12 +39,9 @@ if not os.path.exists(check_root):
 # models
 feature = Feature()
 feature.cuda()
-# feature.load_state_dict(torch.load('/home/zeng/data/models/torch/haha/fcn/feature-epoch-13-step-4000.pth'))
 
-if is_fc:
-    net = Net_fc()
-else:
-    net = Net_conv()
+constructor = 'Net_%s' % opt.m
+net = getattr(model, constructor)()
 net.cuda()
 
 deconv = Deconv()
@@ -52,7 +61,7 @@ optimizer_feature = torch.optim.Adam(feature.parameters(), lr=1e-4)
 for it in range(epoch):
     for ib, (data, lbl) in enumerate(loader):
         inputs = Variable(data).cuda()
-        lbl = Variable(lbl.unsqueeze(1)).cuda()
+        lbl = Variable(lbl.float().unsqueeze(1)).cuda()
 
         feats = feature(inputs)
         feats = feats[::-1]
@@ -109,9 +118,8 @@ for it in range(epoch):
 
         del inputs, msk, lbl, loss, feats
         gc.collect()
-        if ib % 10000 == 0:
-            filename = ('%s/mynet-epoch-%d-step-%d.pth' % (check_root, it, ib))
-            torch.save(net.state_dict(), filename)
-            filename = ('%s/feature-epoch-%d-step-%d.pth' % (check_root, it, ib))
-            torch.save(feature.state_dict(), filename)
-            print('save: (epoch: %d, step: %d)' % (it, ib))
+    filename = ('%s/mynet-epoch-%d-step-%d.pth' % (check_root, it, ib))
+    torch.save(net.state_dict(), filename)
+    filename = ('%s/feature-epoch-%d-step-%d.pth' % (check_root, it, ib))
+    torch.save(feature.state_dict(), filename)
+    print('save: (epoch: %d, step: %d)' % (it, ib))
