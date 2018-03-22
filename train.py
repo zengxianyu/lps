@@ -13,7 +13,7 @@ import os
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--train_dir', default='/home/zeng/data/datasets/saliency_Dataset/DUTS/DUT-train')  # training dataset
+parser.add_argument('--train_dir', default='/home/crow/data/datasets/saliency_Dataset/DUTS/DUT-train')  # training dataset
 parser.add_argument('--check_dir', default='./parameters')  # save checkpoint parameters
 parser.add_argument('--m', default='conv')  # fully connected or convolutional region embedding
 parser.add_argument('--b', type=int, default=6)  # batch size
@@ -84,7 +84,8 @@ loader = torch.utils.data.DataLoader(
 for it in range(epoch):
     for ib, (data, lbl) in enumerate(loader):
         inputs = Variable(data).cuda()
-        noisy_label = (lbl.cpu().numpy() + np.random.binomial(1, float(p)/100.0, (256, 256))) % 2
+        lbl = lbl.float()
+        noisy_label = (lbl.numpy() + np.random.binomial(1, float(p)/100.0, (256, 256))) % 2
         noisy_label = Variable(torch.Tensor(noisy_label).unsqueeze(1)).cuda()
         lbl = Variable(lbl.unsqueeze(1)).cuda()
 
