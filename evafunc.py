@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 
 def main():
-    algs = ['SRM', '+SRM']
+    algs = ['SRM', 'pubcode']
     datasets = ['ECSSD']
     for dataset in datasets:
         print(dataset)

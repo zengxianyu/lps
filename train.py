@@ -17,7 +17,7 @@ parser.add_argument('--train_dir', default='/home/crow/data/datasets/saliency_Da
 parser.add_argument('--check_dir', default='./parameters')  # save checkpoint parameters
 parser.add_argument('--m', default='conv')  # fully connected or convolutional region embedding
 parser.add_argument('--b', type=int, default=6)  # batch size
-parser.add_argument('--e', type=int, default=20)  # epoches
+parser.add_argument('--e', type=int, default=36)  # epoches
 parser.add_argument('--p', type=int, default=5)  # probability of random flipping during training
 opt = parser.parse_args()
 print(opt)
