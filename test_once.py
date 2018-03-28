@@ -13,11 +13,11 @@ import numpy as np
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--input_dir', default='/home/zeng/data/datasets/saliency_Dataset/ECSSD')
-parser.add_argument('--prior_map', default='SRM')  # set prior_map to the name of the directory of proir maps
+parser.add_argument('--prior_map', default='prior')  # set prior_map to the name of the directory of proir maps
 parser.add_argument('--output_dir', default='/home/zeng/data/datasets/saliency_Dataset/ECSSD/pubcode')  # save checkpoint parameters
 parser.add_argument('--m', default='conv')  # fully connected or convolutional region embedding
-parser.add_argument('--f', default='./parameters/feature-epoch-19-step-1758.pth')  # parameters of the feature extractor
-parser.add_argument('--n', default='./parameters/mynet-epoch-19-step-1758.pth')  # parameters of the network
+parser.add_argument('--f', default=None)  # set it to None to download my trained parameters
+parser.add_argument('--n', default=None)  # set it to None to download my trained parameters
 
 
 def main():

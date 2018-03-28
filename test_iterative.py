@@ -13,7 +13,7 @@ import numpy as np
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--input_dir', default='/home/zeng/data/datasets/saliency_Dataset/ECSSD')
-parser.add_argument('--prior_map', default='RFCN')  # set prior_map to the name of the directory of proir maps
+parser.add_argument('--prior_map', default='prior')  # set prior_map to the name of the directory of proir maps
 parser.add_argument('--output_dir', default='/home/zeng/data/datasets/saliency_Dataset/ECSSD/pubcode')  # save checkpoint parameters
 parser.add_argument('--m', default='conv')  # fully connected or convolutional region embedding
 parser.add_argument('--T', type=int, default=3)  # iterations

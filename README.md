@@ -7,6 +7,11 @@ Code for the paper ``Learning to Promote Saliency Detectors" accepted by CVPR 20
 * to download and use my trained model, run ```test_once.py``` or ```test_iterative.py```
 * to train a new model, run ```train.py```
 
+to evaluate performance, run ```evafunc.py``` or call
+```
+evaluate('/path/to/images', 'path/to/ground/truth', 'path/to/save/results', 'name')
+```
+
 ## Citation
 ```
 @inproceedings{zeng2018learning,
