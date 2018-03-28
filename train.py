@@ -11,16 +11,35 @@ from datetime import datetime
 import numpy as np
 import os
 import argparse
+import pdb
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--train_dir', default='/home/crow/data/datasets/saliency_Dataset/DUTS/DUT-train')  # training dataset
+parser.add_argument('--val_dir', default='/home/crow/data/datasets/saliency_Dataset/DUTS/DUT-val')  # training dataset
 parser.add_argument('--check_dir', default='./parameters')  # save checkpoint parameters
 parser.add_argument('--m', default='conv')  # fully connected or convolutional region embedding
-parser.add_argument('--b', type=int, default=6)  # batch size
 parser.add_argument('--e', type=int, default=36)  # epoches
+parser.add_argument('--b', type=int, default=3)  # epoches
 parser.add_argument('--p', type=int, default=5)  # probability of random flipping during training
 opt = parser.parse_args()
 print(opt)
+
+
+def validation(feature, net, loader):
+    total_loss = 0
+    for ib, (data, lbl) in enumerate(loader):
+        inputs = Variable(data).cuda()
+        lbl = lbl.float()
+        noisy_label = (lbl.numpy() + np.random.binomial(1, float(p)/100.0, (256, 256))) % 2
+        noisy_label = Variable(torch.Tensor(noisy_label).unsqueeze(1)).cuda()
+        lbl = Variable(lbl.unsqueeze(1)).cuda()
+
+        feats = feature(inputs)
+        msk = net(feats, noisy_label)
+
+        loss = criterion(msk, lbl)
+        total_loss += loss.data[0]
+    return total_loss / len(loader)
 
 # from tensorboard import SummaryWriter
 # os.system('rm -rf ./runs/*')
@@ -28,6 +47,7 @@ print(opt)
 
 check_root = opt.check_dir
 train_data = opt.train_dir
+val_data = opt.val_dir
 p = opt.p
 epoch = opt.e
 bsize = opt.b
@@ -81,6 +101,10 @@ for it in range(epoch):
 loader = torch.utils.data.DataLoader(
             MyData(train_data, transform=True),
             batch_size=bsize, shuffle=True, num_workers=4, pin_memory=True)
+val_loader = torch.utils.data.DataLoader(
+            MyData(val_data, transform=True),
+            batch_size=bsize, shuffle=True, num_workers=4, pin_memory=True)
+min_loss = 1000.0
 for it in range(epoch):
     for ib, (data, lbl) in enumerate(loader):
         inputs = Variable(data).cuda()
@@ -115,12 +139,15 @@ for it in range(epoch):
         # writer.add_image('maps', torchvision.utils.make_grid(mask1),
         #                  ib)
         # writer.add_scalar('loss', loss.data[0], ib)
-        print('loss: %.4f (epoch: %d, step: %d)' % (loss.data[0], it, ib))
+        print('loss: %.4f, min-loss: %.4f (epoch: %d, step: %d)' % (loss.data[0], min_loss, it, ib))
 
         del inputs, msk, lbl, loss, feats
         gc.collect()
-    filename = ('%s/mynet-epoch-%d-step-%d.pth' % (check_root, it, ib))
-    torch.save(net.state_dict(), filename)
-    filename = ('%s/feature-epoch-%d-step-%d.pth' % (check_root, it, ib))
-    torch.save(feature.state_dict(), filename)
-    print('save: (epoch: %d, step: %d)' % (it, ib))
+    sb = validation(feature, net, val_loader)
+    if sb < min_loss:
+        filename = ('%s/net.pth' % (check_root))
+        torch.save(net.state_dict(), filename)
+        filename = ('%s/feature.pth' % (check_root))
+        torch.save(feature.state_dict(), filename)
+        print('save: (epoch: %d, step: %d)' % (it, ib))
+        min_loss = sb
