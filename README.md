@@ -17,6 +17,6 @@ evaluate('/path/to/images', 'path/to/ground/truth', 'path/to/save/results', 'nam
 @inproceedings{zeng2018learning,
     author = {Yu Zeng, Huchuan Lu, Lihe Zhang, Mengyang Feng, and Ali Borji},
     title = {Learning to Promote Saliency Detectors},
-    booktitle = {CVPR},
+    booktitle = {Proceedings of IEEE Conference on Computer Vision and Pattern Recognition,
     year = {2018}}
 ```
