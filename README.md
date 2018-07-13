@@ -4,7 +4,7 @@ Code for the paper ``Learning to Promote Saliency Detectors" accepted by CVPR 20
 ## Usage
 * first, install [Pytorch](https://github.com/pytorch/pytorch)
 * modify the prior map, input and output directory in ```test_once.py```, ```test_iterative.py```, and ```train.py```
-* to download and use my trained model, run ```test_once.py``` or ```test_iterative.py```
+* to download and use my trained model, run ```test_once.py``` or ```test_iterative.py``` (pretrained models can be downloaded [here](https://pan.baidu.com/s/1B5obuTPJZpq2e1Tx6a1QJQ#list/path=%2F)
 * to train a new model, run ```train.py```
 
 to evaluate performance, run ```evafunc.py``` or call
