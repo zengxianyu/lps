@@ -1,5 +1,5 @@
 # LPS
-There are some problems with the code, I'll update it soon after fixing them
+There are some problems with the code, I'll update it soon after fixing them. Old code is in the master branch
 
 Code for the paper ``Learning to Promote Saliency Detectors" accepted by CVPR 2018.
 
