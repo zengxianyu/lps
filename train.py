@@ -164,7 +164,7 @@ def main():
                mean=mean, std=std), collate_fn=collate_more,
         batch_size=opt.b, shuffle=True, num_workers=4, pin_memory=True)
     optimizer = torch.optim.Adam([
-        {'params': net.parameters(), 'lr': 1e-5},
+        {'params': net.parameters(), 'lr': 1e-4},
     ])
     logs = {'best_it':0, 'best': 0}
     sal_data_iter = iter(train_loader)
