@@ -14,6 +14,7 @@ modify the path to prior maps, images, groud truth and then run test.py
 This version gives slightly different results from the paper. 
 
 ### F-measure
+
   v  |ECSSD | HKU-IS|PASCALS|DUTS-test|THUR|OMRON|
   --- | --- | ---
 SRM  |.8924 | .8739 | .7961 | .7591 |.7079|.7223|
@@ -21,6 +22,7 @@ SRM  |.8924 | .8739 | .7961 | .7591 |.7079|.7223|
 
 
 ### MAE
+
  v   |ECSSD | HKU-IS|PASCALS|DUTS-test|THUR|OMRON|
   --- | --- | ---
 SRM  |.0542 | .0459 | .0852 |.0633|.0769|.0767|
