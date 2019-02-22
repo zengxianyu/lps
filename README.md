@@ -14,7 +14,7 @@ modify the path to prior maps, images, groud truth and then run test.py
 This version gives slightly different results from the paper. 
 
 Prior maps are the results of other methods which are provided by the authors or obtained by runing their code. 
-For example, results of SRM can be downloaded [here](https://github.com/TiantianWang/ICCV17_SRM). Results of applying our method on SRM can be downloaded [here](https://pan.baidu.com/s/1T51KDP0NlLW971kDardZ6g)
+For example, results of SRM can be downloaded [here](https://github.com/TiantianWang/ICCV17_SRM). Results of applying our method on SRM can be downloaded from [百度网盘](https://pan.baidu.com/s/1T51KDP0NlLW971kDardZ6g) or [google drive]https://drive.google.com/open?id=1lufzjX2478U0W3-tbXaEMQGqnadljYQe
 
 ### F-measure
 
